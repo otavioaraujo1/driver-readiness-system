@@ -39,8 +39,15 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnCancelHistory = document.getElementById('btnCancelHistory');
   const btnCancelHistoryCross = document.getElementById('btnCancelHistoryCross');
 
+  const activateAllMaster = document.getElementById('activateAllMaster');
+  const btnImportCsv = document.getElementById('btnImportCsv');
+  const csvFileInput = document.getElementById('csvFileInput');
+  const filterAptoCard = document.getElementById('filterAptoCard');
+  const filterNaoAptoCard = document.getElementById('filterNaoAptoCard');
+
   let allDrivers = [];
   let searchQuery = '';
+  let cardStatusFilter = null;
 
   // 1. Verificar Sessão do Admin
   async function verifySession() {
@@ -108,7 +115,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const filtered = allDrivers.filter(driver => {
       const nameMatch = driver.nome.toLowerCase().includes(searchQuery);
       const plateMatch = driver.placa.toLowerCase().includes(searchQuery);
-      return nameMatch || plateMatch;
+      const matchesSearch = nameMatch || plateMatch;
+
+      const matchesCard = !cardStatusFilter ||
+                          (cardStatusFilter === 'apto' && driver.status === 'APTO') ||
+                          (cardStatusFilter === 'nao-apto' && driver.status === 'NÃO APTO');
+
+      return matchesSearch && matchesCard;
     });
 
     if (filtered.length === 0) {
@@ -451,6 +464,126 @@ document.addEventListener('DOMContentLoaded', () => {
     renderTable();
   });
 
+  function updateCardFilterUI() {
+    filterAptoCard.classList.toggle('stat-filter-active', cardStatusFilter === 'apto');
+    filterNaoAptoCard.classList.toggle('stat-filter-active', cardStatusFilter === 'nao-apto');
+    filterAptoCard.setAttribute('aria-pressed', cardStatusFilter === 'apto');
+    filterNaoAptoCard.setAttribute('aria-pressed', cardStatusFilter === 'nao-apto');
+  }
+
+  function toggleCardFilter(filter) {
+    cardStatusFilter = cardStatusFilter === filter ? null : filter;
+    updateCardFilterUI();
+    renderTable();
+  }
+
+  filterAptoCard.addEventListener('click', () => toggleCardFilter('apto'));
+  filterNaoAptoCard.addEventListener('click', () => toggleCardFilter('nao-apto'));
+
+  // 13. Ativar todos os motoristas em massa
+  activateAllMaster.addEventListener('change', async (e) => {
+    if (!e.target.checked) return;
+
+    if (allDrivers.length === 0) {
+      e.target.checked = false;
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/admin/bulk/activate-all', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+      const data = await parseResponseJson(response);
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Erro ao ativar motoristas em massa.');
+      }
+
+      await fetchDrivers();
+    } catch (err) {
+      console.error(err);
+      alert(err.message || 'Erro ao conectar ao servidor.');
+    } finally {
+      e.target.checked = false;
+    }
+  });
+
+  // 14. Importação de CSV (formato: nome,placa)
+  btnImportCsv.addEventListener('click', () => {
+    csvFileInput.click();
+  });
+
+  csvFileInput.addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    e.target.value = '';
+
+    if (!file) return;
+
+    try {
+      const text = await file.text();
+      const drivers = parseCsvDrivers(text);
+
+      if (drivers.length === 0) {
+        alert('Nenhum motorista válido encontrado no arquivo CSV. Use o formato: nome,placa');
+        return;
+      }
+
+      const confirmed = confirm(`Importar ${drivers.length} motorista(s) do arquivo "${file.name}"?`);
+      if (!confirmed) return;
+
+      const response = await fetch('/api/admin/drivers/import', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ drivers })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Erro ao importar motoristas.');
+      }
+
+      await fetchDrivers();
+
+      let message = `${data.imported} motorista(s) importado(s) com sucesso.`;
+      if (data.skipped && data.skipped.length > 0) {
+        message += `\n\nIgnorados (${data.skipped.length}):\n${data.skipped.slice(0, 5).join('\n')}`;
+        if (data.skipped.length > 5) {
+          message += `\n... e mais ${data.skipped.length - 5}.`;
+        }
+      }
+      alert(message);
+    } catch (err) {
+      console.error(err);
+      alert(err.message || 'Erro ao ler ou importar o arquivo CSV.');
+    }
+  });
+
+  function parseCsvDrivers(csvText) {
+    const lines = csvText.split(/\r?\n/).map(line => line.trim()).filter(Boolean);
+    const drivers = [];
+    const seenPlates = new Set();
+
+    for (const line of lines) {
+      const parts = line.split(',').map(part => part.trim());
+      if (parts.length < 2) continue;
+
+      const nome = parts[0];
+      const placa = parts[1].toUpperCase();
+
+      if (!nome || !placa) continue;
+      if (/^nome$/i.test(nome) && /^placa$/i.test(placa)) continue;
+      if (seenPlates.has(placa)) continue;
+
+      seenPlates.add(placa);
+      drivers.push({ nome, placa });
+    }
+
+    return drivers;
+  }
+
   // Prevenir injeção de HTML
   function escapeHTML(str) {
     return str.replace(/[&<>'"]/g, 
@@ -462,6 +595,17 @@ document.addEventListener('DOMContentLoaded', () => {
         '"': '&quot;'
       }[tag] || tag)
     );
+  }
+
+  async function parseResponseJson(response) {
+    const text = await response.text();
+    try {
+      return JSON.parse(text);
+    } catch {
+      throw new Error(
+        'Servidor desatualizado ou rota não encontrada. Pare o servidor (Ctrl+C) e reinicie com: node server.js'
+      );
+    }
   }
 
   // Inicializar verificação

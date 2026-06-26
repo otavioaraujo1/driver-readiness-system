@@ -10,7 +10,6 @@ const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
 
 // Rotas de páginas (URL amigáveis)
 app.get('/', (req, res) => {
@@ -160,10 +159,133 @@ app.post('/api/admin/drivers', authenticateAdmin, async (req, res) => {
   }
 });
 
+// Ativar checklist de todos os motoristas em massa
+app.post('/api/admin/bulk/activate-all', authenticateAdmin, async (req, res) => {
+  const fieldMapping = {
+    veicular: 'Checklist Veicular',
+    treinamento: 'Treinamento Aplicativo de Entrega',
+    briefing: 'Briefing Operacional',
+    disponibilidade: 'Aplicativo de Disponibilidade'
+  };
+
+  try {
+    const rows = await dbQuery.all(`
+      SELECT d.id,
+             c.veicular, c.treinamento, c.briefing, c.disponibilidade
+      FROM drivers d
+      LEFT JOIN checklists c ON d.id = c.driver_id
+    `);
+
+    if (rows.length === 0) {
+      return res.json({ success: true, updated: 0, message: 'Nenhum motorista cadastrado.' });
+    }
+
+    const nowStr = new Date().toLocaleString('pt-BR');
+    let updatedCount = 0;
+
+    for (const row of rows) {
+      const current = {
+        veicular: row.veicular === 1 ? 1 : 0,
+        treinamento: row.treinamento === 1 ? 1 : 0,
+        briefing: row.briefing === 1 ? 1 : 0,
+        disponibilidade: row.disponibilidade === 1 ? 1 : 0
+      };
+
+      const allActive = Object.values(current).every(value => value === 1);
+      if (allActive) continue;
+
+      for (const [field, label] of Object.entries(fieldMapping)) {
+        if (current[field] !== 1) {
+          await dbQuery.run(
+            'INSERT INTO checklist_history (driver_id, campo, antigo, novo, timestamp) VALUES (?, ?, ?, ?, ?)',
+            [row.id, label, current[field], 1, nowStr]
+          );
+        }
+      }
+
+      await dbQuery.run(
+        `UPDATE checklists
+         SET veicular = 1, treinamento = 1, briefing = 1, disponibilidade = 1, updated_at = ?
+         WHERE driver_id = ?`,
+        [nowStr, row.id]
+      );
+
+      updatedCount += 1;
+    }
+
+    res.json({
+      success: true,
+      updated: updatedCount,
+      message: `${updatedCount} motorista(s) ativado(s) com sucesso.`,
+      updated_at: nowStr
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Erro interno ao ativar motoristas em massa.' });
+  }
+});
+
+// Importar motoristas em lote via CSV
+app.post('/api/admin/drivers/import', authenticateAdmin, async (req, res) => {
+  const { drivers } = req.body;
+
+  if (!Array.isArray(drivers) || drivers.length === 0) {
+    return res.status(400).json({ error: 'Informe ao menos um motorista para importação.' });
+  }
+
+  const nowStr = new Date().toLocaleString('pt-BR');
+  let imported = 0;
+  const skipped = [];
+
+  try {
+    for (const item of drivers) {
+      const nome = typeof item.nome === 'string' ? item.nome.trim() : '';
+      const placa = typeof item.placa === 'string' ? item.placa.trim().toUpperCase() : '';
+
+      if (!nome || !placa) {
+        skipped.push('Linha inválida: nome ou placa ausente.');
+        continue;
+      }
+
+      const exists = await dbQuery.get('SELECT id FROM drivers WHERE placa = ?', [placa]);
+      if (exists) {
+        skipped.push(`${nome} (${placa}) — placa já cadastrada.`);
+        continue;
+      }
+
+      const driverResult = await dbQuery.run(
+        'INSERT INTO drivers (nome, placa) VALUES (?, ?)',
+        [nome, placa]
+      );
+
+      await dbQuery.run(
+        'INSERT INTO checklists (driver_id, veicular, treinamento, briefing, disponibilidade, updated_at) VALUES (?, 0, 0, 0, 0, ?)',
+        [driverResult.id, nowStr]
+      );
+
+      imported += 1;
+    }
+
+    res.status(201).json({
+      success: true,
+      imported,
+      skipped,
+      message: `${imported} motorista(s) importado(s) com sucesso.`
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Erro interno ao importar motoristas.' });
+  }
+});
+
 // Editar motorista (nome e placa)
 app.put('/api/admin/drivers/:id', authenticateAdmin, async (req, res) => {
   const { id } = req.params;
   const { nome, placa } = req.body;
+
+  if (!/^\d+$/.test(String(id))) {
+    return res.status(404).json({ error: 'Motorista não encontrado.' });
+  }
 
   if (!nome || !placa) {
     return res.status(400).json({ error: 'Nome e placa são obrigatórios para a edição.' });
@@ -214,6 +336,10 @@ app.delete('/api/admin/drivers/:id', authenticateAdmin, async (req, res) => {
 // Atualizar checklist de um motorista com log no histórico
 app.put('/api/admin/checklists/:driver_id', authenticateAdmin, async (req, res) => {
   const { driver_id } = req.params;
+
+  if (!/^\d+$/.test(driver_id)) {
+    return res.status(404).json({ error: 'Motorista não encontrado.' });
+  }
   const { veicular, treinamento, briefing, disponibilidade } = req.body;
 
   const vVal = veicular ? 1 : 0;
@@ -317,6 +443,9 @@ app.get('/api/admin/drivers/:id/history', authenticateAdmin, async (req, res) =>
     res.status(500).json({ error: 'Erro interno ao carregar histórico.' });
   }
 });
+
+// Arquivos estáticos (CSS, JS, etc.) — após as rotas da API
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Inicialização do servidor
 app.listen(PORT, () => {

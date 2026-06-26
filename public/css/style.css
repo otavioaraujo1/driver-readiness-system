@@ -147,6 +147,23 @@
 .stat-card.nao-apto {
   border-left: 4px solid var(--color-nao-apto);
 }
+button.stat-card {
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  font-family: inherit;
+  color: inherit;
+}
+button.stat-card.stat-filter-active {
+  border-color: var(--border-color-hover);
+  box-shadow: 0 0 0 1px var(--border-color-hover);
+}
+button.stat-card.apto.stat-filter-active {
+  background: var(--color-apto-bg);
+}
+button.stat-card.nao-apto.stat-filter-active {
+  background: var(--color-nao-apto-bg);
+}
 
 /* Control Section */
 .control-section {

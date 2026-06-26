@@ -6,9 +6,12 @@ document.addEventListener('DOMContentLoaded', () => {
   const searchInput = document.getElementById('searchInput');
   const emptyState = document.getElementById('emptyState');
   const tabBtns = document.querySelectorAll('.tab-btn');
+  const filterAptoCard = document.getElementById('filterAptoCard');
+  const filterNaoAptoCard = document.getElementById('filterNaoAptoCard');
 
   let allDrivers = [];
   let currentFilter = 'all';
+  let cardStatusFilter = null;
   let searchQuery = '';
 
   // Carrega motoristas da API
@@ -56,7 +59,11 @@ document.addEventListener('DOMContentLoaded', () => {
                          (currentFilter === 'apto' && driver.status === 'APTO') ||
                          (currentFilter === 'nao-apto' && driver.status === 'NÃO APTO');
 
-      return matchesSearch && matchesTab;
+      const matchesCard = !cardStatusFilter ||
+                          (cardStatusFilter === 'apto' && driver.status === 'APTO') ||
+                          (cardStatusFilter === 'nao-apto' && driver.status === 'NÃO APTO');
+
+      return matchesSearch && matchesTab && matchesCard;
     });
 
     // Ordenação: NÃO APTOS primeiro, seguido por ordem alfabética de nome
@@ -182,6 +189,22 @@ document.addEventListener('DOMContentLoaded', () => {
       renderDrivers();
     });
   });
+
+  function updateCardFilterUI() {
+    filterAptoCard.classList.toggle('stat-filter-active', cardStatusFilter === 'apto');
+    filterNaoAptoCard.classList.toggle('stat-filter-active', cardStatusFilter === 'nao-apto');
+    filterAptoCard.setAttribute('aria-pressed', cardStatusFilter === 'apto');
+    filterNaoAptoCard.setAttribute('aria-pressed', cardStatusFilter === 'nao-apto');
+  }
+
+  function toggleCardFilter(filter) {
+    cardStatusFilter = cardStatusFilter === filter ? null : filter;
+    updateCardFilterUI();
+    renderDrivers();
+  }
+
+  filterAptoCard.addEventListener('click', () => toggleCardFilter('apto'));
+  filterNaoAptoCard.addEventListener('click', () => toggleCardFilter('nao-apto'));
 
   // Inicialização e polling automático a cada 15 segundos para atualizar
   fetchDrivers();
