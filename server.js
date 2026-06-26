@@ -41,8 +41,11 @@ app.post('/api/auth/login', (req, res) => {
   const { username, password } = req.body;
 
   // Credenciais estáticas para fins de administração simples
-  if (username === 'admin' && password === 'admin123') {
-    const token = jwt.sign({ username: 'admin' }, JWT_SECRET, { expiresIn: '8h' });
+  const secureUser = process.env.ADMIN_USER || 'admin';
+        const securePass = process.env.ADMIN_PASS || 'admin123';
+
+        if (username === secureUser && password === securePass) {
+            const token = jwt.sign({ username: 'admin' }, JWT_SECRET, { expiresIn: '8h' });
     
     // Configura cookie httpOnly seguro
     res.cookie('token', token, {
