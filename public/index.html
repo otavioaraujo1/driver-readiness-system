@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Driver Readiness - Status de Prontidão</title>
+  <link rel="stylesheet" href="/css/variables.css">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+  <!-- Background Decorative Orbs -->
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+
+  <header class="app-header">
+    <div class="header-container">
+      <div class="logo-area">
+        <svg class="logo-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z" />
+        </svg>
+        <div class="logo-text">
+          <h1>Driver Readiness</h1>
+          <p>Painel de Controle de Prontidão</p>
+        </div>
+      </div>
+      <a href="/admin" class="btn-admin" id="btnAdminLink">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+        </svg>
+        Área do Administrador
+      </a>
+    </div>
+  </header>
+
+  <main class="app-main">
+    <!-- Dashboard Stats Banner -->
+    <section class="stats-section">
+      <div class="stat-card total">
+        <div class="stat-icon">👥</div>
+        <div class="stat-info">
+          <span class="stat-label">Total de Motoristas</span>
+          <h2 id="totalCount">-</h2>
+        </div>
+      </div>
+      <div class="stat-card apto">
+        <div class="stat-icon">✅</div>
+        <div class="stat-info">
+          <span class="stat-label">Aptos para Operação</span>
+          <h2 id="aptoCount">-</h2>
+        </div>
+      </div>
+      <div class="stat-card nao-apto">
+        <div class="stat-icon">⚠️</div>
+        <div class="stat-info">
+          <span class="stat-label">Com Pendências</span>
+          <h2 id="naoAptoCount">-</h2>
+        </div>
+      </div>
+    </section>
+
+    <!-- Filters and Search -->
+    <section class="control-section">
+      <div class="search-bar">
+        <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.602 10.602z" />
+        </svg>
+        <input type="text" id="searchInput" placeholder="Pesquisar por motorista ou placa do veículo...">
+      </div>
+      
+      <div class="filter-tabs">
+        <button class="tab-btn active" data-filter="all">Todos</button>
+        <button class="tab-btn" data-filter="apto">Aptos</button>
+        <button class="tab-btn" data-filter="nao-apto">Não Aptos</button>
+      </div>
+    </section>
+
+    <!-- Drivers List Section -->
+    <section class="drivers-section">
+      <div class="section-header">
+        <h3>Lista de Motoristas</h3>
+        <span class="pulse-indicator">Painel Atualizado</span>
+      </div>
+
+      <div class="drivers-grid" id="driversGrid">
+        <!-- Skeleton Loader -->
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+      </div>
+
+      <!-- No Results State -->
+      <div class="empty-state hidden" id="emptyState">
+        <div class="empty-icon">🔍</div>
+        <h4>Nenhum motorista encontrado</h4>
+        <p>Tente ajustar sua busca ou filtros.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="app-footer">
+    <p>&copy; 2026 Driver Readiness. Todos os direitos reservados.</p>
+  </footer>
+
+  <script src="/js/app.js"></script>
+</body>
+</html>

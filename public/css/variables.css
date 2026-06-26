@@ -1,0 +1,77 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap');
+
+:root {
+  /* Colors */
+  --bg-primary: hsl(224, 25%, 8%);
+  --bg-secondary: hsl(222, 21%, 13%);
+  --bg-card: hsla(222, 21%, 18%, 0.6);
+  --bg-card-hover: hsla(222, 21%, 23%, 0.8);
+  
+  --color-primary: hsl(217, 91%, 60%);
+  --color-primary-hover: hsl(217, 91%, 68%);
+  --color-primary-glow: hsla(217, 91%, 60%, 0.15);
+  
+  --color-apto: hsl(142, 72%, 40%);
+  --color-apto-bg: hsla(142, 72%, 40%, 0.15);
+  --color-apto-hover: hsl(142, 72%, 48%);
+  
+  --color-nao-apto: hsl(0, 84%, 60%);
+  --color-nao-apto-bg: hsla(0, 84%, 60%, 0.15);
+  --color-nao-apto-hover: hsl(0, 84%, 68%);
+  
+  --text-main: hsl(210, 20%, 98%);
+  --text-muted: hsl(215, 20%, 65%);
+  --text-dark: hsl(220, 20%, 15%);
+  
+  --border-color: hsla(217, 30%, 30%, 0.35);
+  --border-color-hover: hsla(217, 30%, 40%, 0.5);
+  --border-glow: hsla(217, 91%, 60%, 0.25);
+  
+  /* Fonts */
+  --font-title: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  
+  /* Transitions */
+  --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  /* Glassmorphism Styles */
+  --glass-bg: rgba(17, 24, 39, 0.7);
+  --glass-border: 1px solid rgba(255, 255, 255, 0.08);
+  --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  --backdrop-blur: blur(16px);
+  
+  /* Border Radius */
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-full: 9999px;
+}
+
+/* Global Reset */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--bg-primary);
+  color: var(--text-main);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-title);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+input, button, select, textarea {
+  font-family: inherit;
+  outline: none;
+}

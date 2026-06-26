@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel Administrativo - Driver Readiness</title>
+  <link rel="stylesheet" href="/css/variables.css">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body>
+
+  <!-- Background Decorative Orbs -->
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+
+  <!-- Header -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="logo-area">
+        <svg class="logo-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z" />
+        </svg>
+        <div class="logo-text">
+          <h1>Painel Administrativo</h1>
+          <p>Gerenciamento de Motoristas e Checklists</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button id="btnOpenCreateModal" class="btn-new-driver">
+          + Novo Motorista
+        </button>
+        <span class="user-badge" id="userBadge">Carregando...</span>
+        <button id="btnLogout" class="btn-logout">
+          Sair
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="app-main">
+    <!-- Stats Row -->
+    <section class="stats-section">
+      <div class="stat-card">
+        <span class="stat-icon">👥</span>
+        <div class="stat-info">
+          <span class="stat-label">Total de Motoristas</span>
+          <h2 id="totalCount">-</h2>
+        </div>
+      </div>
+      <div class="stat-card apto">
+        <span class="stat-icon">✅</span>
+        <div class="stat-info">
+          <span class="stat-label">Aptos</span>
+          <h2 id="aptoCount">-</h2>
+        </div>
+      </div>
+      <div class="stat-card nao-apto">
+        <span class="stat-icon">⚠️</span>
+        <div class="stat-info">
+          <span class="stat-label">Não Aptos</span>
+          <h2 id="naoAptoCount">-</h2>
+        </div>
+      </div>
+    </section>
+
+    <!-- Full Width Drivers List -->
+    <section class="list-section card-glass full-width-list">
+      <div class="list-header">
+        <h3 class="section-title">Lista de Controle</h3>
+        <!-- Search input -->
+        <div class="search-box">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.602 10.602z" />
+          </svg>
+          <input type="text" id="searchInput" placeholder="Pesquisar...">
+        </div>
+      </div>
+
+      <!-- Table Container -->
+      <div class="table-responsive">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Motorista / Placa</th>
+              <th class="text-center">Checklist Veicular</th>
+              <th class="text-center">Treinamento App</th>
+              <th class="text-center">Briefing Op.</th>
+              <th class="text-center">App Disp.</th>
+              <th class="text-center">Status</th>
+              <th class="text-center">Última Atualização</th>
+              <th class="text-right">Ações</th>
+            </tr>
+          </thead>
+          <tbody id="adminDriversBody">
+            <!-- Loaders -->
+            <tr>
+              <td colspan="8" class="text-center padding-large">Carregando dados dos operadores...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <!-- Create Driver Modal -->
+  <div class="modal-overlay hidden" id="createModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h4>Cadastrar Novo Motorista</h4>
+        <button class="btn-close-modal" id="btnCancelCreateCross">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="alert success hidden" id="creationSuccess">
+          Motorista cadastrado com sucesso.
+        </div>
+        <div class="alert error hidden" id="creationError">
+          Erro ao cadastrar motorista.
+        </div>
+        <form id="createDriverForm" class="admin-form">
+          <div class="input-group">
+            <label for="driverName">Nome Completo</label>
+            <input type="text" id="driverName" placeholder="Ex: João da Silva" required>
+          </div>
+          <div class="input-group">
+            <label for="driverPlate">Placa do Veículo</label>
+            <input type="text" id="driverPlate" placeholder="Ex: ABC1D23" required maxlength="10">
+          </div>
+          <div class="modal-actions">
+            <button type="button" class="btn-secondary" id="btnCancelCreate">Cancelar</button>
+            <button type="submit" class="btn-primary">Cadastrar Motorista</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Modal -->
+  <div class="modal-overlay hidden" id="editModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h4>Editar Dados do Motorista</h4>
+        <button class="btn-close-modal" id="btnCancelEditCross">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="alert error hidden" id="editError">
+          Erro ao atualizar dados.
+        </div>
+        <form id="editDriverForm" class="admin-form">
+          <input type="hidden" id="editDriverId">
+          <div class="input-group">
+            <label for="editDriverName">Nome Completo</label>
+            <input type="text" id="editDriverName" required>
+          </div>
+          <div class="input-group">
+            <label for="editDriverPlate">Placa do Veículo</label>
+            <input type="text" id="editDriverPlate" required maxlength="10">
+          </div>
+          <div class="modal-actions">
+            <button type="button" class="btn-secondary" id="btnCancelEdit">Cancelar</button>
+            <button type="submit" class="btn-primary">Salvar Alterações</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- History Modal -->
+  <div class="modal-overlay hidden" id="historyModal">
+    <div class="modal-card modal-large">
+      <div class="modal-header">
+        <div>
+          <h4 style="font-size: 1.15rem; color: var(--text-main);">Histórico de Alterações</h4>
+          <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;" id="historyDriverMeta"></p>
+        </div>
+        <button class="btn-close-modal" id="btnCancelHistoryCross">&times;</button>
+      </div>
+      <div class="modal-body" style="max-height: 400px; overflow-y: auto;">
+        <!-- Timeline de Histórico -->
+        <div class="timeline" id="historyTimeline">
+          <!-- Injetado dinamicamente -->
+        </div>
+        <div class="empty-state hidden" id="emptyHistoryState" style="padding: 2.5rem 1.5rem;">
+          <p style="color: var(--text-muted);">Nenhum histórico de alterações registrado para este motorista.</p>
+        </div>
+      </div>
+      <div class="modal-actions" style="padding: 1rem 1.5rem; border-top: 1px solid var(--border-color); margin-top: 0;">
+        <button type="button" class="btn-secondary" id="btnCancelHistory" style="padding: 0.6rem 1.25rem;">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="app-footer">
+    <p>&copy; 2026 Driver Readiness. Todos os direitos reservados.</p>
+  </footer>
+
+  <script src="/js/admin.js"></script>
+</body>
+</html>

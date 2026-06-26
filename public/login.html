@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Driver Readiness - Admin Login</title>
+  <link rel="stylesheet" href="/css/variables.css">
+  <link rel="stylesheet" href="/css/login.css">
+</head>
+<body>
+
+  <!-- Decorative Orbs -->
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+
+  <div class="login-wrapper">
+    <div class="login-card">
+      <div class="login-header">
+        <svg class="logo-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+        </svg>
+        <h2>Área Restrita</h2>
+        <p>Acesse o painel operacional de administração</p>
+      </div>
+
+      <!-- Error Alert -->
+      <div class="alert error hidden" id="errorAlert">
+        <span class="alert-icon">⚠️</span>
+        <span class="alert-message" id="errorMessage">Usuário ou senha inválidos.</span>
+      </div>
+
+      <form id="loginForm" class="login-form">
+        <div class="input-group">
+          <label for="username">Usuário</label>
+          <div class="input-field">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+            </svg>
+            <input type="text" id="username" placeholder="Insira seu usuário" required>
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label for="password">Senha</label>
+          <div class="input-field">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+            </svg>
+            <input type="password" id="password" placeholder="Insira sua senha" required>
+          </div>
+        </div>
+
+        <button type="submit" class="btn-login" id="btnLoginSubmit">
+          Entrar no Painel
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+          </svg>
+        </button>
+      </form>
+
+      <a href="/" class="btn-back">
+        Voltar para a Página Pública
+      </a>
+    </div>
+  </div>
+
+  <script src="/js/login.js"></script>
+</body>
+</html>
